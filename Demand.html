@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demand Check</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #demandReport {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .back-button {
+            display: block;
+            width: 150px;
+            margin: 20px auto;
+            padding: 10px;
+            text-align: center;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-button:hover {
+          background-color: #0056b3;
+        }
+        .no-orders {
+          text-align: center;
+          font-style: italic;
+          color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Demand Report</h1>
+    <div id="demandReport"></div>
+    <a href="index.html" class="back-button">Back to Main Page</a>
+
+    <script>
+        function generateDemandReport() {
+            const ordersData = localStorage.getItem('orders.txt');
+            const reportContainer = document.getElementById('demandReport');
+
+            if (!ordersData) {
+                reportContainer.innerHTML = '<p class="no-orders">No orders have been placed yet.</p>';
+                return;
+            }
+
+            const orders = ordersData.trim().split('\n');
+            const foodDemand = {};
+            const peopleByFood = {};
+
+            // Aggregate food demand and people
+            orders.forEach(order => {
+                const [name, food] = order.split(': ');
+                if (food) { // Check if food is defined
+                    if (foodDemand[food]) {
+                        foodDemand[food]++;
+                    } else {
+                        foodDemand[food] = 1;
+                    }
+
+                    if (peopleByFood[food]) {
+                        peopleByFood[food].push(name);
+                    } else {
+                        peopleByFood[food] = [name];
+                    }
+                }
+            });
+
+            // Define ingredients (this is a simplified example)
+            const ingredients = {
+                pizza: ['dough', 'tomato sauce', 'cheese', 'toppings'],
+                burger: ['bun', 'beef patty', 'cheese', 'lettuce', 'tomato'],
+                pasta: ['pasta', 'tomato sauce', 'meatballs', 'cheese'],
+                salad: ['lettuce', 'tomato', 'cucumber', 'dressing'],
+                sushi: ['rice', 'seaweed', 'fish', 'vegetables'],
+                tacos: ['tortillas', 'meat', 'salsa', 'cheese', 'lettuce']
+            };
+
+            // Generate HTML report
+            let reportHTML = '<h2>Food Demand</h2><table>';
+            reportHTML += '<tr><th>Food</th><th>Quantity</th><th>People</th></tr>';
+            for (const food in foodDemand) {
+                reportHTML += `<tr><td>${food}</td><td>${foodDemand[food]}</td><td>${peopleByFood[food].join(', ')}</td></tr>`;
+            }
+            reportHTML += '</table>';
+
+            reportHTML += '<h2>Ingredient Needs (Simplified)</h2><table>';
+            reportHTML += '<tr><th>Food</th><th>Ingredients</th></tr>';
+            for (const food in foodDemand) {
+                if (ingredients[food]) {
+                    const ingredientList = ingredients[food].map(ingredient => {
+                        return `${ingredient} (x${foodDemand[food]})`; // Show quantity needed
+                    }).join(', ');
+                    reportHTML += `<tr><td>${food}</td><td>${ingredientList}</td></tr>`;
+                } else {
+                    reportHTML += `<tr><td>${food}</td><td>Ingredients not defined</td></tr>`; //handle if not found
+                }
+            }
+            reportHTML += '</table>';
+
+
+            reportContainer.innerHTML = reportHTML;
+        }
+
+        generateDemandReport(); // Call the function to generate the report when the page loads
+    </script>
+</body>
+</html>
