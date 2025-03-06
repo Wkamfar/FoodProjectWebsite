@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Order Form</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+        form {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Important for consistent sizing */
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            display: none; /* Hide by default */
+        }
+        .error-message.show {
+          display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <form id="foodOrderForm">
+        <h1>Food Order</h1>
+
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="food">Select Your Food:</label>
+        <select id="food" name="food" required>
+            <option value="">-- Select a Food Item --</option>
+            <option value="pizza">Pizza</option>
+            <option value="burger">Burger</option>
+            <option value="pasta">Pasta</option>
+            <option value="salad">Salad</option>
+            <option value="sushi">Sushi</option>
+            <option value="tacos">Tacos</option>
+        </select>
+
+        <input type="submit" value="Submit Order">
+        <div id="errorMessage" class="error-message"></div>
+    </form>
+
+    <script>
+        const form = document.getElementById('foodOrderForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const submissionsFileName = 'submissions.txt';  //File to use.
+        const ordersFileName = 'orders.txt';
+
+        // Function to load existing names from localStorage
+        function loadExistingNames() {
+            const existingNames = localStorage.getItem(submissionsFileName);
+            return existingNames ? existingNames.split(',') : [];
+        }
+
+        // Function to save the current list of names to localStorage
+        function saveExistingNames(names) {
+            localStorage.setItem(submissionsFileName, names.join(','));
+        }
+
+        // Function to save an order to local storage.
+        function saveOrder(name, food) {
+          const orderData = `${name}: ${food}\n`;
+          //Retrieve existing orders
+          let existingOrders = localStorage.getItem(ordersFileName) || "";
+          existingOrders += orderData;
+          localStorage.setItem(ordersFileName, existingOrders);
+        }
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const name = document.getElementById('name').value.trim();
+            const food = document.getElementById('food').value;
+
+            if (!name || !food) {
+                errorMessage.textContent = "Please fill out all fields.";
+                errorMessage.classList.add('show');
+                return; // Stop processing if fields are empty
+            }
+
+            const existingNames = loadExistingNames();
+
+             // Convert both to lowercase for case-insensitive comparison
+            if (existingNames.map(existing => existing.toLowerCase()).includes(name.toLowerCase())) {
+                errorMessage.textContent = `The name '${name}' has already been used.`;
+                errorMessage.classList.add('show');
+                return; // Stop if name exists
+            }
+
+            // Add the new name to the list and save it
+            existingNames.push(name);
+            saveExistingNames(existingNames);
+
+            //Save order
+            saveOrder(name, food);
+
+            // Redirect to index.html after successful "submission"
+            window.location.href = "index.html"; // Change in final
+        });
+    </script>
+
+</body>
+</html>
